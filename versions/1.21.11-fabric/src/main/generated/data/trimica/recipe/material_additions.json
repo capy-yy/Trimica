@@ -1,0 +1,5 @@
+{
+  "type": "trimica:material_addition",
+  "addition": "#trimica:material_additions",
+  "base": "#trimica:all_trimmables"
+}

@@ -19,10 +19,9 @@ stonecutter {
         fun mc(mcVersion: String, name: String = mcVersion, loaders: Iterable<String>) =
             loaders.forEach { vers("$name-$it", mcVersion).buildscript = "build.$it.gradle.kts" }
 
-        mc("1.21.8", loaders = listOf("fabric", "neoforge"))
-        mc("1.21.10", loaders = listOf("fabric", "neoforge"))
+        mc("1.21.11", loaders = listOf("fabric"))
 
-        vcsVersion = "1.21.10-fabric"
+        vcsVersion = "1.21.11-fabric"
     }
 }
 
@@ -37,13 +36,13 @@ gradle.beforeProject {
             preCommitHook.writeText(
                 """
                 #!/bin/bash
-                
+
                 vcs_version=$(ggrep -oP 'vcsVersion\s*=\s*"\K[^"]+' settings.gradle.kts)
                 active_version=$(ggrep -oP 'stonecutter\s+active\s+"\K[^"]+' stonecutter.gradle.kts)
-                
+
                 echo "Detected vcsVersion: ${'$'}vcs_version"
                 echo "Detected active version: ${'$'}active_version"
-                
+
                 if [ "${'$'}vcs_version" != "${'$'}active_version" ]; then
                   echo "Please run './gradlew \"Reset active project\"' to set the stonecutter branch to the version control version."
                   exit 1

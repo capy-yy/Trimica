@@ -44,7 +44,7 @@ dependencies {
     }
   })
 
-  modImplementation("net.fabricmc:fabric-loader:0.17.3")
+  modImplementation("net.fabricmc:fabric-loader:0.18.4")
   modImplementation("net.fabricmc.fabric-api:fabric-api:${deps("fabric_api")}")
 
   remoteDepBuilder(project, fletchingTable::modrinth)
@@ -77,9 +77,9 @@ dependencies {
   deps("configurable") {
     modImplementation(annotationProcessor("com.bawnorton.configurable:configurable-$loader:$it")!!)
   }
-  deps("bettertrims") {
-    modImplementation("com.bawnorton.bettertrims:bettertrims-$loader:$it")
-  }
+  // deps("bettertrims") {
+  //   modImplementation("com.bawnorton.bettertrims:bettertrims-$loader:$it")
+  // }
 }
 
 java {

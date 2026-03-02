@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "#c:dyes/blue",
+    "C": "#c:dyes/cyan",
+    "G": "#c:dyes/lime",
+    "I": "#c:dyes/purple",
+    "O": "#c:dyes/orange",
+    "R": "#c:dyes/red",
+    "V": "#c:dyes/pink",
+    "X": "trimica:animator",
+    "Y": "#c:dyes/yellow"
+  },
+  "pattern": [
+    "ROY",
+    "VXG",
+    "IBC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "trimica:rainbowifier"
+  }
+}
