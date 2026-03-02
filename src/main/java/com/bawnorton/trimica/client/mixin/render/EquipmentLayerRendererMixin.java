@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 //? if >=1.21.10
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;

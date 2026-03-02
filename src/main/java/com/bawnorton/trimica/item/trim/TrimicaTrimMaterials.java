@@ -4,13 +4,13 @@ import com.bawnorton.trimica.Trimica;
 import com.bawnorton.trimica.item.TrimicaItems;
 import com.bawnorton.trimica.item.component.MaterialAdditions;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.equipment.trim.MaterialAssetGroup;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 
