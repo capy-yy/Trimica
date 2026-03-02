@@ -10,7 +10,7 @@ import com.bawnorton.trimica.util.SortableEndpointHolder;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import net.minecraft.core.component.DataComponentGetter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
@@ -53,8 +53,8 @@ public final class TrimicaClientApiImpl implements TrimicaClientApi {
         );
     }
 
-    public ResourceLocation applyBaseTextureInterceptorsForItem(
-        ResourceLocation expectedBaseTexture,
+    public Identifier applyBaseTextureInterceptorsForItem(
+        Identifier expectedBaseTexture,
         ItemStack itemWithTrim,
         ArmorTrim armourTrim
     ) {
@@ -72,8 +72,8 @@ public final class TrimicaClientApiImpl implements TrimicaClientApi {
         return expectedBaseTexture;
     }
 
-    public ResourceLocation applyBaseTextureInterceptorsForArmour(
-        ResourceLocation expectedBaseTexture,
+    public Identifier applyBaseTextureInterceptorsForArmour(
+        Identifier expectedBaseTexture,
         ItemStack itemWithTrim,
         ArmorTrim armourTrim
     ) {
@@ -91,8 +91,8 @@ public final class TrimicaClientApiImpl implements TrimicaClientApi {
         return expectedBaseTexture;
     }
 
-    public ResourceLocation applyBaseTextureInterceptorsForShield(
-        ResourceLocation expectedBaseTexture,
+    public Identifier applyBaseTextureInterceptorsForShield(
+        Identifier expectedBaseTexture,
         DataComponentGetter componentGetter,
         ArmorTrim armourTrim
     ) {

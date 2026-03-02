@@ -20,17 +20,24 @@ import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.kikugie.fletching_table.annotation.MixinEnvironment;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
+//? if >=1.21.10
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
@@ -47,190 +54,244 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
-//? if >=1.21.10
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-
 @MixinEnvironment("client")
 @Mixin(EquipmentLayerRenderer.class)
 abstract class EquipmentLayerRendererMixin {
-	@Shadow
-	@Final
-	private Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite> trimSpriteLookup;
 
-	@WrapOperation(
-			method = "<init>",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/Util;memoize(Ljava/util/function/Function;)Ljava/util/function/Function;",
-					ordinal = 1
-			)
-	)
-	private Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite> provideRuntimeTextures(Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite> textureGetter, Operation<Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite>> original) {
-		return trimica$dynamicProvider(original.call(textureGetter));
-	}
+    @Shadow
+    @Final
+    private Function<
+        EquipmentLayerRenderer.TrimSpriteKey,
+        TextureAtlasSprite
+    > trimSpriteLookup;
 
-	@SuppressWarnings("resource")
-	@Unique
-	private static @NotNull Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite> trimica$dynamicProvider(Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite> textureGetter) {
-		return trimSpriteKey -> {
-			TextureAtlasSprite sprite = textureGetter.apply(trimSpriteKey);
-			ProfilerFiller profiler = Profiler.get();
-			profiler.push("trimica:armour_runtime_atlas");
-			ItemStack stack = TrimArmourSpriteFactory.ITEM_WITH_TRIM_CAPTURE.get();
-			MaterialAdditions addition = stack.getOrDefault(MaterialAdditions.TYPE, MaterialAdditions.NONE);
-			if (!sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation()) && addition.isEmpty()) return sprite;
+    @WrapOperation(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/Util;memoize(Ljava/util/function/Function;)Ljava/util/function/Function;",
+            ordinal = 1
+        )
+    )
+    private Function<
+        EquipmentLayerRenderer.TrimSpriteKey,
+        TextureAtlasSprite
+    > provideRuntimeTextures(
+        Function<
+            EquipmentLayerRenderer.TrimSpriteKey,
+            TextureAtlasSprite
+        > textureGetter,
+        Operation<
+            Function<EquipmentLayerRenderer.TrimSpriteKey, TextureAtlasSprite>
+        > original
+    ) {
+        return trimica$dynamicProvider(original.call(textureGetter));
+    }
 
-			RuntimeTrimAtlases atlases = TrimicaClient.getRuntimeAtlases();
-			TrimMaterial material = trimSpriteKey.trim().material().value();
-			RuntimeTrimAtlas atlas = atlases.getEquipmentAtlas(Minecraft.getInstance().level, material, trimSpriteKey.layerType());
-			if (atlas == null) return sprite;
+    @SuppressWarnings("resource")
+    @Unique
+    private static @NotNull Function<
+        EquipmentLayerRenderer.TrimSpriteKey,
+        TextureAtlasSprite
+    > trimica$dynamicProvider(
+        Function<
+            EquipmentLayerRenderer.TrimSpriteKey,
+            TextureAtlasSprite
+        > textureGetter
+    ) {
+        return trimSpriteKey -> {
+            TextureAtlasSprite sprite = textureGetter.apply(trimSpriteKey);
+            ProfilerFiller profiler = Profiler.get();
+            profiler.push("trimica:armour_runtime_atlas");
+            ItemStack stack =
+                TrimArmourSpriteFactory.ITEM_WITH_TRIM_CAPTURE.get();
+            MaterialAdditions addition = stack.getOrDefault(
+                MaterialAdditions.TYPE,
+                MaterialAdditions.NONE
+            );
+            if (
+                !sprite
+                    .contents()
+                    .name()
+                    .equals(MissingTextureAtlasSprite.getLocation()) &&
+                addition.isEmpty()
+            ) return sprite;
 
-			ResourceLocation overlayLocation = trimSpriteKey.spriteId();
-			overlayLocation = addition.apply(overlayLocation);
-			TrimPattern pattern = trimSpriteKey.trim().pattern().value();
-			DynamicTrimTextureAtlasSprite dynamicSprite = atlas.getSprite(stack, pattern, overlayLocation);
-			profiler.pop();
-			return dynamicSprite;
-		};
-	}
+            RuntimeTrimAtlases atlases = TrimicaClient.getRuntimeAtlases();
+            TrimMaterial material = trimSpriteKey.trim().material().value();
+            RuntimeTrimAtlas atlas = atlases.getEquipmentAtlas(
+                Minecraft.getInstance().level,
+                material,
+                trimSpriteKey.layerType()
+            );
+            if (atlas == null) return sprite;
 
-	//? if >=1.21.10 {
-	@ModifyReceiver(
-			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/ResourceLocation;II)V",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"
-			)
-	)
-	private <S> ItemStack captureItemWithTrimOrRenderAll(
-			ItemStack instance,
-			DataComponentType<?> dataComponentType,
-			EquipmentClientInfo.LayerType layerType,
-			ResourceKey<EquipmentAsset> equipmentAsset,
-			Model<? super S> armorModel,
-			S renderState,
-			ItemStack item,
-			PoseStack poseStack,
-			SubmitNodeCollector nodeCollector,
-			int packedLight,
-			@Nullable ResourceLocation texture,
-			int outlineColor,
-			int key,
-			@Cancellable CallbackInfo ci
-	) {
-		TrimArmourSpriteFactory.ITEM_WITH_TRIM_CAPTURE.set(instance);
-		if (!AdditionalTrims.enableAdditionalTrims) {
-			return instance;
-		}
+            Identifier overlayLocation = trimSpriteKey.spriteId();
+            overlayLocation = addition.apply(overlayLocation);
+            TrimPattern pattern = trimSpriteKey.trim().pattern().value();
+            DynamicTrimTextureAtlasSprite dynamicSprite = atlas.getSprite(
+                stack,
+                pattern,
+                overlayLocation
+            );
+            profiler.pop();
+            return dynamicSprite;
+        };
+    }
 
-		ci.cancel();
-		List<BiConsumer<Boolean, Boolean>> renderers = new ArrayList<>();
-		boolean isEmissive = false;
-		boolean isAnimated = false;
-		List<ArmorTrim> trims = AdditionalTrims.getAllTrims(instance);
-		for (ArmorTrim trim : trims) {
-			TextureAtlasSprite sprite = trimSpriteLookup.apply(EquipmentLayerRenderer$TrimSpriteKeyAccessor.trimica$init(trim, layerType, equipmentAsset));
-			TrimPalette palette;
-			RenderType renderType;
-			if (sprite instanceof DynamicTrimTextureAtlasSprite dynamicSprite) {
-				palette = dynamicSprite.getPalette();
-				if (palette != null) {
-					if (palette.isAnimated()) isAnimated = true;
-					if (palette.isEmissive()) isEmissive = true;
-				}
-				renderType = dynamicSprite.getRenderType();
-			} else {
-				renderType = Sheets.armorTrimsSheet(trim.pattern().value().decal());
-			}
-			AtomicInteger index = new AtomicInteger(key);
-			renderers.add((emissive, animated) -> {
-				if (animated) {
-					Compat.ifSodiumPresent(compat -> compat.markSpriteAsActive(sprite));
-				}
-				nodeCollector.order(index.getAndIncrement())
-						.submitModel(
-								armorModel,
-								renderState,
-								poseStack,
-								renderType,
-								emissive ? LightTexture.FULL_BRIGHT : packedLight,
-								OverlayTexture.NO_OVERLAY,
-								-1,
-								sprite,
-								outlineColor,
-								null
-						);
-			});
-		}
-		for (BiConsumer<Boolean, Boolean> renderer : renderers) {
-			renderer.accept(isEmissive, isAnimated);
-		}
-		return instance;
-	}
+    //? if >=1.21.10 {
+    @ModifyReceiver(
+        method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"
+        )
+    )
+    private <S> ItemStack captureItemWithTrimOrRenderAll(
+        ItemStack instance,
+        DataComponentType<?> dataComponentType,
+        EquipmentClientInfo.LayerType layerType,
+        ResourceKey<EquipmentAsset> equipmentAsset,
+        Model<? super S> armorModel,
+        S renderState,
+        ItemStack item,
+        PoseStack poseStack,
+        SubmitNodeCollector nodeCollector,
+        int packedLight,
+        @Nullable Identifier texture,
+        int outlineColor,
+        int key,
+        @Cancellable CallbackInfo ci
+    ) {
+        TrimArmourSpriteFactory.ITEM_WITH_TRIM_CAPTURE.set(instance);
+        if (!AdditionalTrims.enableAdditionalTrims) {
+            return instance;
+        }
 
-	@WrapOperation(
-			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/ResourceLocation;II)V",
-			at = @At(
-					value = "INVOKE:LAST",
-					target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"
-			)
-	)
-	private <S> void useDynamicRenderType(
-			OrderedSubmitNodeCollector instance,
-			Model<? super S> model,
-			S renderState,
-			PoseStack poseStack,
-			RenderType renderType,
-			int packedLight,
-			int packedOverlay,
-			int tintColor,
-			TextureAtlasSprite textureAtlasSprite,
-			int outlineColor,
-			ModelFeatureRenderer.CrumblingOverlay crumblingOverlay,
-			Operation<Void> original
-	) {
-		if (textureAtlasSprite instanceof DynamicTrimTextureAtlasSprite dynamicSprite) {
-			TrimPalette palette = dynamicSprite.getPalette();
-			if (palette != null && palette.isAnimated()) {
-				Compat.ifSodiumPresent(compat -> compat.markSpriteAsActive(dynamicSprite));
-			}
-			original.call(instance,
-					model,
-					renderState,
-					poseStack,
-					dynamicSprite.getRenderType(),
-					palette != null ? (palette.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight) : packedLight,
-					packedOverlay,
-					tintColor,
-					textureAtlasSprite,
-					outlineColor,
-					crumblingOverlay
-			);
-		} else {
-			original.call(instance,
-					model,
-					renderState,
-					poseStack,
-					renderType,
-					packedLight,
-					packedOverlay,
-					tintColor,
-					textureAtlasSprite,
-					outlineColor,
-					crumblingOverlay
-			);
-		}
-	}
+        ci.cancel();
+        List<BiConsumer<Boolean, Boolean>> renderers = new ArrayList<>();
+        boolean isEmissive = false;
+        boolean isAnimated = false;
+        List<ArmorTrim> trims = AdditionalTrims.getAllTrims(instance);
+        for (ArmorTrim trim : trims) {
+            TextureAtlasSprite sprite = trimSpriteLookup.apply(
+                EquipmentLayerRenderer$TrimSpriteKeyAccessor.trimica$init(
+                    trim,
+                    layerType,
+                    equipmentAsset
+                )
+            );
+            TrimPalette palette;
+            RenderType renderType;
+            if (sprite instanceof DynamicTrimTextureAtlasSprite dynamicSprite) {
+                palette = dynamicSprite.getPalette();
+                if (palette != null) {
+                    if (palette.isAnimated()) isAnimated = true;
+                    if (palette.isEmissive()) isEmissive = true;
+                }
+                renderType = dynamicSprite.getRenderType();
+            } else {
+                renderType = Sheets.armorTrimsSheet(
+                    trim.pattern().value().decal()
+                );
+            }
+            AtomicInteger index = new AtomicInteger(key);
+            renderers.add((emissive, animated) -> {
+                if (animated) {
+                    Compat.ifSodiumPresent(compat ->
+                        compat.markSpriteAsActive(sprite)
+                    );
+                }
+                nodeCollector
+                    .order(index.getAndIncrement())
+                    .submitModel(
+                        armorModel,
+                        renderState,
+                        poseStack,
+                        renderType,
+                        emissive ? LightTexture.FULL_BRIGHT : packedLight,
+                        OverlayTexture.NO_OVERLAY,
+                        -1,
+                        sprite,
+                        outlineColor,
+                        null
+                    );
+            });
+        }
+        for (BiConsumer<Boolean, Boolean> renderer : renderers) {
+            renderer.accept(isEmissive, isAnimated);
+        }
+        return instance;
+    }
 
-	//?} else {
-	/*@ModifyReceiver(
-			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V",
+    @WrapOperation(
+        method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V",
+        at = @At(
+            value = "INVOKE:LAST",
+            target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"
+        )
+    )
+    private <S> void useDynamicRenderType(
+        OrderedSubmitNodeCollector instance,
+        Model<? super S> model,
+        S renderState,
+        PoseStack poseStack,
+        RenderType renderType,
+        int packedLight,
+        int packedOverlay,
+        int tintColor,
+        TextureAtlasSprite textureAtlasSprite,
+        int outlineColor,
+        ModelFeatureRenderer.CrumblingOverlay crumblingOverlay,
+        Operation<Void> original
+    ) {
+        if (
+            textureAtlasSprite instanceof
+                DynamicTrimTextureAtlasSprite dynamicSprite
+        ) {
+            TrimPalette palette = dynamicSprite.getPalette();
+            if (palette != null && palette.isAnimated()) {
+                Compat.ifSodiumPresent(compat ->
+                    compat.markSpriteAsActive(dynamicSprite)
+                );
+            }
+            original.call(
+                instance,
+                model,
+                renderState,
+                poseStack,
+                dynamicSprite.getRenderType(),
+                palette != null
+                    ? (palette.isEmissive()
+                          ? LightTexture.FULL_BRIGHT
+                          : packedLight)
+                    : packedLight,
+                packedOverlay,
+                tintColor,
+                textureAtlasSprite,
+                outlineColor,
+                crumblingOverlay
+            );
+        } else {
+            original.call(
+                instance,
+                model,
+                renderState,
+                poseStack,
+                renderType,
+                packedLight,
+                packedOverlay,
+                tintColor,
+                textureAtlasSprite,
+                outlineColor,
+                crumblingOverlay
+            );
+        }
+    }
+
+    //?} else {
+    /*@ModifyReceiver(
+			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/Identifier;)V",
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"
@@ -283,7 +344,7 @@ abstract class EquipmentLayerRendererMixin {
 	}
 
 	@WrapOperation(
-			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V",
+			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/Identifier;)V",
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/renderer/MultiBufferSource;getBuffer(Lnet/minecraft/client/renderer/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"
@@ -302,7 +363,7 @@ abstract class EquipmentLayerRendererMixin {
 	}
 
 	@WrapOperation(
-			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/ResourceLocation;)V",
+			method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/resources/Identifier;)V",
 			at = @At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/model/Model;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;II)V"
@@ -313,5 +374,5 @@ abstract class EquipmentLayerRendererMixin {
 		int light = palette == null ? i : (palette.isEmissive() ? LightTexture.FULL_BRIGHT : i);
 		original.call(instance, poseStack, vertexConsumer, light, j);
 	}
-	*///?}
+	*/ //?}
 }

@@ -6,113 +6,127 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DynamicTrimTextureAtlasSprite extends TextureAtlasSprite {
-	private final TextureAtlasSprite delegate;
-	private final RenderType renderType;
-	private final TrimPalette palette;
 
-	public DynamicTrimTextureAtlasSprite(TextureAtlasSprite delegate, RenderType renderType, TrimPalette palette) {
-		super(delegate.atlasLocation(), delegate.contents(), 1, 1, delegate.getX(), delegate.getY());
-		this.delegate = delegate;
-		this.renderType = renderType;
-		this.palette = palette;
-	}
+    private final TextureAtlasSprite delegate;
+    private final RenderType renderType;
+    private final TrimPalette palette;
 
-	public RenderType getRenderType() {
-		return renderType;
-	}
+    public DynamicTrimTextureAtlasSprite(
+        TextureAtlasSprite delegate,
+        RenderType renderType,
+        TrimPalette palette
+    ) {
+        super(
+            delegate.atlasLocation(),
+            delegate.contents(),
+            1,
+            1,
+            delegate.getX(),
+            delegate.getY()
+        );
+        this.delegate = delegate;
+        this.renderType = renderType;
+        this.palette = palette;
+    }
 
-	@Nullable
-	public TrimPalette getPalette() {
-		return palette;
-	}
+    public RenderType getRenderType() {
+        return renderType;
+    }
 
-	@Override
-	public int getX() {
-		return delegate.getX();
-	}
+    @Nullable
+    public TrimPalette getPalette() {
+        return palette;
+    }
 
-	@Override
-	public int getY() {
-		return delegate.getY();
-	}
+    @Override
+    public int getX() {
+        return delegate.getX();
+    }
 
-	@Override
-	public float getU0() {
-		return delegate.getU0();
-	}
+    @Override
+    public int getY() {
+        return delegate.getY();
+    }
 
-	@Override
-	public float getU1() {
-		return delegate.getU1();
-	}
+    @Override
+    public float getU0() {
+        return delegate.getU0();
+    }
 
-	@Override
-	public @NotNull SpriteContents contents() {
-		return delegate.contents();
-	}
+    @Override
+    public float getU1() {
+        return delegate.getU1();
+    }
 
-	@Override
-	public @Nullable Ticker createTicker() {
-		return delegate.createTicker();
-	}
+    @Override
+    public @NotNull SpriteContents contents() {
+        return delegate.contents();
+    }
 
-	@Override
-	public float getU(float f) {
-		return delegate.getU(f);
-	}
+    @Override
+    public @Nullable Ticker createTicker() {
+        return delegate.createTicker();
+    }
 
-	@Override
-	public float getUOffset(float f) {
-		return delegate.getUOffset(f);
-	}
+    @Override
+    public float getU(float f) {
+        return delegate.getU(f);
+    }
 
-	@Override
-	public float getV0() {
-		return delegate.getV0();
-	}
+    @Override
+    public float getUOffset(float f) {
+        return delegate.getUOffset(f);
+    }
 
-	@Override
-	public float getV1() {
-		return delegate.getV1();
-	}
+    @Override
+    public float getV0() {
+        return delegate.getV0();
+    }
 
-	@Override
-	public float getV(float f) {
-		return delegate.getV(f);
-	}
+    @Override
+    public float getV1() {
+        return delegate.getV1();
+    }
 
-	@Override
-	public float getVOffset(float f) {
-		return delegate.getVOffset(f);
-	}
+    @Override
+    public float getV(float f) {
+        return delegate.getV(f);
+    }
 
-	@Override
-	public @NotNull ResourceLocation atlasLocation() {
-		return delegate.atlasLocation();
-	}
+    @Override
+    public float getVOffset(float f) {
+        return delegate.getVOffset(f);
+    }
 
-	@Override
-	public @NotNull String toString() {
-		return "Dynamic{%s, %s}".formatted(delegate, renderType);
-	}
+    @Override
+    public @NotNull Identifier atlasLocation() {
+        return delegate.atlasLocation();
+    }
 
-	@Override
-	public void uploadFirstFrame(@NotNull GpuTexture gpuTexture) {
-		delegate.uploadFirstFrame(gpuTexture);
-	}
+    @Override
+    public @NotNull String toString() {
+        return "Dynamic{%s, %s}".formatted(delegate, renderType);
+    }
 
-	@Override
-	public float uvShrinkRatio() {
-		return delegate.uvShrinkRatio();
-	}
+    @Override
+    public void uploadFirstFrame(@NotNull GpuTexture gpuTexture) {
+        delegate.uploadFirstFrame(gpuTexture);
+    }
 
-	@Override
-	public @NotNull VertexConsumer wrap(@NotNull VertexConsumer vertexConsumer) {
-		return delegate.wrap(vertexConsumer);
-	}
+    @Override
+    public float uvShrinkRatio() {
+        return delegate.uvShrinkRatio();
+    }
+
+    @Override
+    public @NotNull VertexConsumer wrap(
+        @NotNull VertexConsumer vertexConsumer
+    ) {
+        return delegate.wrap(vertexConsumer);
+    }
 }
