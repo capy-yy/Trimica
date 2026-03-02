@@ -100,7 +100,7 @@ public final class TrimPaletteGenerator {
                 .filter(e -> e.getValue().equals(material))
                 .findFirst()
                 .map(Map.Entry::getKey)
-                .map(ResourceKey::location)
+                .map(ResourceKey::identifier)
                 .orElse(null);
             if (materialId == null) {
                 return List.of();

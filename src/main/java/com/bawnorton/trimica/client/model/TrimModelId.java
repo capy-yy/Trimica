@@ -47,7 +47,7 @@ public record TrimModelId(
             trimmedType,
             patternId,
             materialId,
-            assetKey == null ? null : assetKey.location()
+            assetKey == null ? null : assetKey.identifier()
         );
     }
 }

@@ -62,7 +62,8 @@ public interface TrimicaAdvancementsProvider {
             .map(VanillaRecipeProvider.TrimTemplate::recipeId)
             .forEach(resourceKey ->
                 builder.addCriterion(
-                    "armor_trimmed_with_rainbowifier_" + resourceKey.location(),
+                    "armor_trimmed_with_rainbowifier_" +
+                        resourceKey.identifier(),
                     RecipeCraftedTrigger.TriggerInstance.craftedItem(
                         resourceKey,
                         List.of(

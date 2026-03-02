@@ -124,7 +124,7 @@ public class TrimItemSpriteFactory extends AbstractTrimSpriteFactory {
         Identifier location = trim
             .pattern()
             .unwrap()
-            .map(ResourceKey::location, TrimPattern::assetId);
+            .map(ResourceKey::identifier, TrimPattern::assetId);
         return Trimica.rl(
             "textures/trims/items/%s/%s/%s.png".formatted(
                 trimmedType.getName(),

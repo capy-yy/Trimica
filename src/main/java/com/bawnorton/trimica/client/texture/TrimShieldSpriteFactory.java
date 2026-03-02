@@ -98,7 +98,7 @@ public class TrimShieldSpriteFactory extends AbstractTrimSpriteFactory {
             .orElse(null);
         if (patternKey == null) return null;
 
-        Identifier location = patternKey.location();
+        Identifier location = patternKey.identifier();
         return Trimica.rl(
             "textures/trims/items/shield/%s/%s.png".formatted(
                 location.getNamespace(),

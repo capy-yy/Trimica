@@ -104,7 +104,7 @@ public final class TrimMaterialRuntimeRegistry {
     public void registerMaterialReference(
         Holder.Reference<TrimMaterial> reference
     ) {
-        materials.put(reference.key().location(), reference);
+        materials.put(reference.key().identifier(), reference);
     }
 
     public void setIntrinsicAdditions(

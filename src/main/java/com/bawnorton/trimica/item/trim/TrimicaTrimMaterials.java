@@ -15,29 +15,45 @@ import net.minecraft.world.item.equipment.trim.MaterialAssetGroup;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 
 public class TrimicaTrimMaterials {
-	public static final ResourceKey<TrimMaterial> RAINBOW = registerKey("rainbow");
 
-	public static void bootstrap(BootstrapContext<TrimMaterial> context) {
-		register(
-				context,
-				RAINBOW,
-				Style.EMPTY.withColor(ChatFormatting.WHITE),
-				MaterialAssetGroup.create("rainbow"),
-				new MaterialAdditions(BuiltInRegistries.ITEM.getKey(TrimicaItems.ANIMATOR))
-		);
-	}
+    public static final ResourceKey<TrimMaterial> RAINBOW = registerKey(
+        "rainbow"
+    );
 
-	private static void register(BootstrapContext<TrimMaterial> context, ResourceKey<TrimMaterial> key, Style style, MaterialAssetGroup assets, MaterialAdditions additions) {
-		Component component = Component.translatable(Util.makeDescriptionId(
-				"trim_material",
-				Trimica.rl(key.location().getPath())
-		)).withStyle(style);
-		TrimMaterial material = new TrimMaterial(assets, component);
-		Trimica.getMaterialRegistry().setIntrinsicAdditions(material, additions);
-		context.register(key, material);
-	}
+    public static void bootstrap(BootstrapContext<TrimMaterial> context) {
+        register(
+            context,
+            RAINBOW,
+            Style.EMPTY.withColor(ChatFormatting.WHITE),
+            MaterialAssetGroup.create("rainbow"),
+            new MaterialAdditions(
+                BuiltInRegistries.ITEM.getKey(TrimicaItems.ANIMATOR)
+            )
+        );
+    }
 
-	private static ResourceKey<TrimMaterial> registerKey(String name) {
-		return ResourceKey.create(Registries.TRIM_MATERIAL, Trimica.rl(name));
-	}
+    private static void register(
+        BootstrapContext<TrimMaterial> context,
+        ResourceKey<TrimMaterial> key,
+        Style style,
+        MaterialAssetGroup assets,
+        MaterialAdditions additions
+    ) {
+        Component component = Component.translatable(
+            Util.makeDescriptionId(
+                "trim_material",
+                Trimica.rl(key.identifier().getPath())
+            )
+        ).withStyle(style);
+        TrimMaterial material = new TrimMaterial(assets, component);
+        Trimica.getMaterialRegistry().setIntrinsicAdditions(
+            material,
+            additions
+        );
+        context.register(key, material);
+    }
+
+    private static ResourceKey<TrimMaterial> registerKey(String name) {
+        return ResourceKey.create(Registries.TRIM_MATERIAL, Trimica.rl(name));
+    }
 }

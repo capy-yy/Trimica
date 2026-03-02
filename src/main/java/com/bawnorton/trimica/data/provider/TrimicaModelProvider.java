@@ -19,7 +19,7 @@ public interface TrimicaModelProvider {
         Identifier id = item
             .builtInRegistryHolder()
             .key()
-            .location()
+            .identifier()
             .withPrefix("item/");
         Identifier modelLoc = ModelTemplates.FLAT_ITEM.create(
             item,

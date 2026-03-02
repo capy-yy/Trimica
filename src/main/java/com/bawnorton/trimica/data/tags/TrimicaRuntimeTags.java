@@ -26,7 +26,7 @@ public final class TrimicaRuntimeTags {
     public KeyHolder createMaterialKeyHolderForItem(
         Holder.Reference<Item> item
     ) {
-        Identifier id = item.key().location();
+        Identifier id = item.key().identifier();
         Identifier generatedId = Trimica.rl(
             "generated/%s/%s".formatted(id.getNamespace(), id.getPath())
         );
