@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
@@ -74,7 +75,8 @@ public abstract class AbstractTrimSpriteFactory {
                 resourceMetadata.getSection(AnimationMetadataSection.TYPE),
                 resourceMetadata.getTypedSections(
                     List.of(AnimationMetadataSection.TYPE)
-                )
+                ),
+                null // its optional and the old constructor didn't take it
             ),
             metadata.palette()
         );

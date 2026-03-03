@@ -27,7 +27,8 @@ public class DynamicTrimTextureAtlasSprite extends TextureAtlasSprite {
             1,
             1,
             delegate.getX(),
-            delegate.getY()
+            delegate.getY(),
+            1 //idk what im doing tbh, temporary value rn
         );
         this.delegate = delegate;
         this.renderType = renderType;
