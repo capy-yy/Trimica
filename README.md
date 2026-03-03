@@ -1,3 +1,7 @@
+> [!NOTE]  
+> This mod is originally made by [Bawnorton](https://github.com/Bawnorton/Trimica) but due to it not being updated for a pretty long time I have decided to update it myself. This fork will only be updated to the versions I need it on which is currently 1.21.11. Also expect some bugs because I'm still a beginner. 
+
+
 # Trimica
 
 [![Modrinth](https://img.shields.io/modrinth/dt/trimica?colour=00AF5C&label=downloads&logo=modrinth)](https://modrinth.com/mod/trimica)
