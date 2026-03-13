@@ -72,7 +72,7 @@ public class LootTableReader {
                     Either<ResourceKey<LootTable>, LootTable> value =
                         nestedLootTable.trimica$contents();
                     LootTable table = value.map(
-                        key -> getter.get(key.location()),
+                        key -> getter.get(key.identifier()),
                         Function.identity()
                     );
                     if (table == null) yield List.of();

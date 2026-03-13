@@ -17,18 +17,17 @@ public class DynamicTrimTextureAtlasSprite extends TextureAtlasSprite {
     private final TrimPalette palette;
 
     public DynamicTrimTextureAtlasSprite(
-        TextureAtlasSprite delegate,
-        RenderType renderType,
-        TrimPalette palette
-    ) {
+            TextureAtlasSprite delegate,
+            RenderType renderType,
+            TrimPalette palette) {
         super(
-            delegate.atlasLocation(),
-            delegate.contents(),
-            1,
-            1,
-            delegate.getX(),
-            delegate.getY(),
-            1 //idk what im doing tbh, temporary value rn
+                delegate.atlasLocation(),
+                delegate.contents(),
+                1,
+                1,
+                delegate.getX(),
+                delegate.getY(),
+                1 // idk what im doing tbh, temporary value rn
         );
         this.delegate = delegate;
         this.renderType = renderType;
@@ -115,8 +114,8 @@ public class DynamicTrimTextureAtlasSprite extends TextureAtlasSprite {
     }
 
     @Override
-    public void uploadFirstFrame(@NotNull GpuTexture gpuTexture) {
-        delegate.uploadFirstFrame(gpuTexture);
+    public void uploadFirstFrame(@NotNull GpuTexture gpuTexture, int mipLevel) {
+        delegate.uploadFirstFrame(gpuTexture, 0);
     }
 
     @Override
@@ -126,8 +125,7 @@ public class DynamicTrimTextureAtlasSprite extends TextureAtlasSprite {
 
     @Override
     public @NotNull VertexConsumer wrap(
-        @NotNull VertexConsumer vertexConsumer
-    ) {
+            @NotNull VertexConsumer vertexConsumer) {
         return delegate.wrap(vertexConsumer);
     }
 }
